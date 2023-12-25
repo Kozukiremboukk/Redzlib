@@ -485,7 +485,7 @@ function RedzLib:MakeWindow(Configs)
     local BStroke = Configs.UIStroke or true
     local BTransparency = Configs.BackgroundTransparency or 0
     
-    local Button = Create(BType .. "Label", ScreenGui, {
+    local Button = Create(BType .. "Button", ScreenGui, {
       BackgroundColor3 = ConfigsHub["Color Hub 1"],
       BackgroundTransparency = BTransparency,
       Size = UDim2.fromOffset(unpack(BSize)),
@@ -493,6 +493,26 @@ function RedzLib:MakeWindow(Configs)
       Active = true,
       Draggable = true
     })
+    
+    local UIScale = Create("UIScale", MainFrame)
+    
+    local Minimized, WaitClick
+    Button.MouseButton1Click:Connect(function()
+      if not WaitClick then
+        WaitClick = true
+        if Minimized then
+          MainFrame.Visible = true
+          CreateTween(UIScale, "Scale", 1, 0.2, true)
+        else
+          CreateTween(UIScale, "Scale", 0, 0.2, true)
+          MainFrame.Visible = false
+        end
+        WaitClick = false
+        ControlGuiSize.Active = Minimized
+        ControlGuiSize.Draggable = Minimized
+        Minimized = not Minimized
+      end
+    end)
     
     if BType == "Image" then
       Button.Image = BNameImage
@@ -503,6 +523,7 @@ function RedzLib:MakeWindow(Configs)
     end
     if BCorner then ElementsHub:Corner(Button)end
     if BStroke then ElementsHub:Stroke(Button)end
+  end
   local IsFirst = true
   function Window:Set(val1)
     if typeof(val1) == "number" then
@@ -1945,4 +1966,18 @@ function RedzLib:MakeWindow(Configs)
   return Window
 end
 
-return RedzLib
+local Window = RedzLib:MakeWindow({
+  Menu = {
+    Title = "REDz HUB teste",
+  },
+  LoadAnim = {
+    Active = true,
+    Title = "by : redz9999",
+    WaitTime = 0.5
+  }
+})
+
+Window:MinimizeButton({
+  Type = "Image",
+  Image = "rbxassetid://15298567397"
+})
