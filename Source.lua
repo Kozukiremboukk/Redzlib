@@ -6,7 +6,7 @@ local UserInputService = game:GetService("UserInputService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local Player = Players.LocalPlayer
 local ViewportSize = workspace.CurrentCamera.ViewportSize
-local UIScale = ViewportSize.Y / 550
+local UIScale = ViewportSize.Y / 500
 
 local RedzLib = {
   PlayerName = Player.Name,
@@ -53,7 +53,7 @@ local function CreateTween(instance, prop, value, time, tweenWait)
   local tweenWait = tweenWait or true
   
   local tween = TweenService:Create(instance,
-  TweenInfo.new(time, Enum.EasingStyle.Linear),
+  TweenInfo.new(time * 1.5, Enum.EasingStyle.Sine),
   {[prop] = value})
   tween:Play()
   if tweenWait then
@@ -143,6 +143,115 @@ function RedzLib:Set(val1)
   end
 end
 
+local NotifyContainer = Create("Frame", ScreenGui, {
+  Size = UDim2.new(0, 350 / UIScale, 1, 0),
+  Position = UDim2.new(1, 0, 0, 0),
+  AnchorPoint = Vector2.new(1, 0),
+  BackgroundTransparency = 1
+})Create("UIPadding", NotifyContainer, {
+  PaddingLeft = UDim.new(0, 25),
+  PaddingTop = UDim.new(0, 25),
+  PaddingBottom = UDim.new(0, 30)
+})Create("UIListLayout", NotifyContainer, {
+  Padding = UDim.new(0, 15),
+  VerticalAlignment = "Bottom"
+})
+
+function RedzLib:MakeNotify(Configs)
+  local NName = Configs[1] or Configs.Name or "redz Library"
+  local NText = Configs[2] or Configs.Text or "Notification"
+  local NTime = Configs[3] or Configs.Time or 5
+  
+  local FrameContainer = Create("Frame", NotifyContainer, {
+    Size = UDim2.new(2, 0, 0, 50),
+    BackgroundTransparency = 1,
+    AutomaticSize = "Y"
+  })
+  
+  local NotifyContainer = Create("Frame", FrameContainer, {
+    Size = UDim2.new(0.45, 0, 1, 0),
+    Position = UDim2.new(1, 0, 0, 0),
+    BackgroundColor3 = ConfigsHub["Color Hub 1"],
+    AutomaticSize = "Y"
+  })ElementsHub:Corner(NotifyContainer)
+  
+  local CloseButton = Create("TextButton", NotifyContainer, {
+    Size = UDim2.new(0, 15, 0, 15),
+    AnchorPoint = Vector2.new(1, 0),
+    Position = UDim2.new(1, -10, 0, 5),
+    TextScaled = true,
+    BackgroundColor3 = ConfigsHub["Color Hub 2"],
+    Text = "X",
+    Font = ConfigsHub["Font"],
+    TextColor3 = ConfigsHub["Color Text"]
+  })ElementsHub:Corner(CloseButton)
+  
+  local TextContainer = Create("Frame", NotifyContainer, {
+    Size = UDim2.new(1, 0, 1, 0),
+    AutomaticSize = "Y",
+    BackgroundTransparency = 1
+  })Create("UIPadding", TextContainer, {
+    PaddingRight = UDim.new(0, 5),
+    PaddingLeft = UDim.new(0, 15),
+    PaddingTop = UDim.new(0, 5),
+    PaddingBottom = UDim.new(0, 5)
+  })Create("UIListLayout", TextContainer, {
+    Padding = UDim.new(0, 3)
+  })Create("TextLabel", TextContainer, {
+    Size = UDim2.new(1, 0, 0, 0),
+    Text = NName,
+    TextColor3 = ConfigsHub["Color Text"],
+    Font = ConfigsHub["Font"],
+    BackgroundTransparency = 1,
+    TextXAlignment = "Left",
+    TextSize = 14,
+    AutomaticSize = "Y"
+  })Create("TextLabel", TextContainer, {
+    Size = UDim2.new(1, 0, 0, 0),
+    Text = NText,
+    TextColor3 = ConfigsHub["Color Dark Text"],
+    Font = ConfigsHub["Font"],
+    BackgroundTransparency = 1,
+    TextXAlignment = "Left",
+    TextSize = 12,
+    AutomaticSize = "Y"
+  })
+  
+  local destroy
+  CloseButton.MouseButton1Click:Connect(function()
+    destroy = true
+    CreateTween(NotifyContainer, "Position", UDim2.new(0, -20, 0, 0), 0.2, true)
+    CreateTween(NotifyContainer, "Position", UDim2.fromScale(1, 0), 0.5, true)
+    FrameContainer:Destroy()
+  end)
+  
+  task.spawn(function()
+    CreateTween(NotifyContainer, "Position", UDim2.new(0, -20, 0, 0), 0.5, true)
+    CreateTween(NotifyContainer, "Position", UDim2.new(), 0.2, true)
+    task.wait(NTime)
+    if not destroy then
+      CreateTween(NotifyContainer, "Position", UDim2.new(0, -20, 0, 0), 0.2, true)
+      CreateTween(NotifyContainer, "Position", UDim2.fromScale(1, 0), 0.5, true)
+      FrameContainer:Destroy()
+    end
+  end)
+  
+  local Notify = {}
+  
+  function Notify:Destroy()
+    destroy = true
+    CreateTween(NotifyContainer, "Position", UDim2.new(0, -20, 0, 0), 0.2, true)
+    CreateTween(NotifyContainer, "Position", UDim2.fromScale(1, 0), 0.5, true)
+    FrameContainer:Destroy()
+  end
+  
+  function Notify:Visible(Bool)
+    FrameContainer.Visible = Bool
+  end
+  
+  return Notify
+end
+
 function RedzLib:MakeWindow(Configs)
   local HubTitle = Configs.Menu.Title or "Redz Library"
   local HubMiniText = Configs[2] or Configs.MiniText or "by : redz9999"
@@ -157,8 +266,8 @@ function RedzLib:MakeWindow(Configs)
     Size = UDim2.new(),
     Position = UDim2.new(0.5, 0 -550/2, 0.5, -310/2),
     BackgroundColor3 = ConfigsHub["Color Hub 1"],
-    Draggable = true,
-    Active = true
+    Active = true,
+    Draggable = true
   })ElementsHub:Corner(MainFrame, {CornerRadius = UDim.new(0, 8)})
   
   CreateTween(MainFrame, "Size", UDim2.new(0, 0, 0, 30), 0.1, true)
@@ -222,8 +331,8 @@ function RedzLib:MakeWindow(Configs)
     AnchorPoint = Vector2.new(1, 1),
     BackgroundColor3 = Color3.fromRGB(90, 90, 90),
     BackgroundTransparency = 1,
-    Draggable = true,
-    Active = true
+    Active = true,
+    Draggable = true
   })
   
   local NotifiContainer = Create("TextButton", MainFrame, {
@@ -246,14 +355,13 @@ function RedzLib:MakeWindow(Configs)
     if Bool then
       NotifiContainer.Visible = true
       NotifiFrameVisible = true
-      CreateTween(NotifiContainer, "Size", UDim2.new(1, 0, 1, 0), 0.3, true)
+      task.spawn(CreateTween, NotifiContainer, "Size", UDim2.new(1, 0, 1, 0), 0.2, true)
     else
       CreateTween(NotifiContainer, "Size", UDim2.new(), 0.3, true)
       NotifiContainer.Visible = false
       NotifiFrameVisible = false
     end
   end
-  
   local function ControlSize()
     ControlGuiSize.Position = UDim2.new(0, math.clamp(ControlGuiSize.Position.X.Offset, 400, 900), 0, math.clamp(ControlGuiSize.Position.Y.Offset, 200, 500))
     ControlScrollSize.Position = UDim2.new(0, math.clamp(ControlScrollSize.Position.X.Offset, 140, 275), 1, 0)
@@ -261,10 +369,8 @@ function RedzLib:MakeWindow(Configs)
     MainFrame.Size = ControlGuiSize.Position
     Containers.Size = UDim2.new(1, -ControlScrollSize.Position.X.Offset, 1, -TabSize)
   end
-  
   ControlGuiSize:GetPropertyChangedSignal("Position"):Connect(ControlSize)
   ControlScrollSize:GetPropertyChangedSignal("Position"):Connect(ControlSize)
-  
   local MinimizeButton = Create("TextButton", TopBar, {
     Size = UDim2.new(0, 25, 0, 25),
     AnchorPoint = Vector2.new(1, 0.5),
@@ -307,13 +413,72 @@ function RedzLib:MakeWindow(Configs)
     end
   end)
   
-  CloseButton.MouseButton1Click:Connect(function()
+  task.spawn(function()
+    local Frame = Create("Frame", NotifiContainer, {
+      Size = UDim2.new(0.65, 0, 0.55, 0),
+      Position = UDim2.new(0.5, 0, 0.5, 0),
+      AnchorPoint = Vector2.new(0.5, 0.5),
+      BackgroundColor3 = ConfigsHub["Color Hub 1"]
+    })ElementsHub:Corner(Frame)Create("TextLabel", Frame, {
+      Size = UDim2.new(0.6, 0, 0, 0),
+      Position = UDim2.new(0.5, 0, 0.3, 0),
+      AnchorPoint = Vector2.new(0.5, 0.5),
+      AutomaticSize = "Y",
+      TextWrapped = true,
+      Text = "are you sure you want to close this script??",
+      Font = ConfigsHub["Font"],
+      TextColor3 = ConfigsHub["Color Text"],
+      BackgroundTransparency = 1,
+      TextSize = 18
+    })
     
+    local Close = Create("TextButton", Frame, {
+      Size = UDim2.new(0.25, 0, 0.25, 0),
+      Position = UDim2.new(0.2, 0, 0.6, 0),
+      Text = "Close",
+      Font = ConfigsHub["Font"],
+      TextColor3 = Color3.fromRGB(200, 0, 0),
+      TextSize = 18,
+      BackgroundColor3 = ConfigsHub["Color Hub 2"]
+    })ElementsHub:Corner(Close)ElementsHub:Stroke(Close)
+    
+    local Cancel = Create("TextButton", Frame, {
+      Size = UDim2.new(0.25, 0, 0.25, 0),
+      Position = UDim2.new(0.8, 0, 0.6, 0),
+      AnchorPoint = Vector2.new(1, 0),
+      Text = "Cancel",
+      Font = ConfigsHub["Font"],
+      TextColor3 = Color3.fromRGB(0, 200, 0),
+      TextSize = 18,
+      BackgroundColor3 = ConfigsHub["Color Hub 2"]
+    })ElementsHub:Corner(Cancel)ElementsHub:Stroke(Cancel)
+    
+    Close.MouseButton1Click:Connect(function()
+      CreateTween(UIScaleI, "Scale", 0, 0.3, true)
+      MainFrame:Destroy()
+    end)
+    
+    Cancel.MouseButton1Click:Connect(function()
+      SetFrameNotifiVisible(false)
+    end)
+    
+    CloseButton.MouseButton1Click:Connect(function()
+      SetFrameNotifiVisible(true)
+      if Minimized then
+        MinimizeButton.Text = "-"
+        WaitPress = true
+        local udim = UDim2.new(0, MainFrame.Size.X.Offset, 0, SaveSize)
+        CreateTween(MainFrame, "Size", udim, 0.2, true)
+        ControlGuiSize.Active = true
+        ControlGuiSize.Draggable = true
+        Minimized, WaitPress = false, false
+      end
+      
+      
+    end)
   end)
-  
   local Window = {}
   local IsFirst = true
-  
   function Window:Set(val1)
     if typeof(val1) == "number" then
       MainFrame.Transparency = val1
@@ -321,15 +486,12 @@ function RedzLib:MakeWindow(Configs)
       MainFrame.BackgroundColor3 = val1
     end
   end
-  
   function Window:Destroy()
     MainFrame:Destroy()
   end
-  
   function Window:Visible(Bool)
     MainFrame.Visible = Bool
   end
-  
   function Window:Separator()
     local Frame1 = Create("Frame", Scroll, {
       Size = UDim2.new(1, 0, 0, 15),
@@ -353,10 +515,8 @@ function RedzLib:MakeWindow(Configs)
     function Separator:Visible(Bool)
       Frame1.Visible = Bool
     end
-    
     return Separator
   end
-  
   function Window:MakeTab(Configs)
     local TabName = Configs[1] or Configs.Name or "Redz Library"
     local TabImage = Configs[2] or Configs.Image or ""
@@ -416,41 +576,26 @@ function RedzLib:MakeWindow(Configs)
       end
       for _,frame in pairs(Scroll:GetChildren()) do
         if frame ~= TabFrame and frame:IsA("TextButton") then
-          task.spawn(function()CreateTween(frame.Frame, "BackgroundTransparency", 1, 0.3)end)
-          task.spawn(function()CreateTween(frame.ImageLabel, "ImageTransparency", 0.4, 0.3)end)
-          task.spawn(function()CreateTween(frame:WaitForChild("Text"), "TextTransparency", 0.4, 0.3)end)
+          task.spawn(CreateTween, frame.Frame, "BackgroundTransparency", 1, 0.3)
+          task.spawn(CreateTween, frame.ImageLabel, "ImageTransparency", 0.4, 0.3)
+          task.spawn(CreateTween, frame:WaitForChild("Text"), "TextTransparency", 0.4, 0.3)
         end
       end
-      task.spawn(function()CreateTween(IsSelected, "BackgroundTransparency", 0, 0.3)end)
-      task.spawn(function()CreateTween(ImageLabel, "ImageTransparency", 0, 0.3)end)
-      task.spawn(function()CreateTween(TextLabel, "TextTransparency", 0, 0.3)end)
+      task.spawn(CreateTween, IsSelected, "BackgroundTransparency", 0, 0.3)
+      task.spawn(CreateTween, ImageLabel, "ImageTransparency", 0, 0.3)
+      task.spawn(CreateTween, TextLabel, "TextTransparency", 0, 0.3)
+      CreateTween(Container, "Position", UDim2.fromOffset(0, -20), 0.05, true)
+      CreateTween(Container, "Position", UDim2.fromOffset(), 0.2, true)
     end)
     
     local Tab = {}
-    
     function Tab:Set(NewValue1, NewValue2)
       if typeof(NewValue) == "string" then
-        if string.find(NewValue, "rbxassetid://") then
-          ImageLabel.Image = NewValue
-        else
-          TextLabel.Text = NewValue
-        end
-        if NewValue2 and string.find(NewValue, "rbxassetid://") then
-          ImageLabel.Image = NewValue
-        end
-      end
+      if string.find(NewValue, "rbxassetid://") then ImageLabel.Image = NewValue else TextLabel.Text = NewValue end
+      if NewValue2 and string.find(NewValue, "rbxassetid://") then ImageLabel.Image = NewValue end;end
     end
-    
-    function Tab:Visible(Bool)
-      Container.Visible = Bool
-      TabFrame.Visible = Bool
-    end
-    
-    function Tab:Destroy()
-      Container:Destroy()
-      TabFrame:Destroy()
-    end
-    
+    function Tab:Visible(Bool)Container.Visible = Bool TabFrame.Visible = Bool end
+    function Tab:Destroy()Container:Destroy()TabFrame:Destroy()end
     function Tab:AddSection(Configs)
       local SectionName = Configs[1] or Configs.Name or "Section!!"
       
@@ -490,7 +635,6 @@ function RedzLib:MakeWindow(Configs)
       
       return Section
     end
-    
     function Tab:AddLabel(Configs)
       local Type = Configs[1] or Configs.Type or "Text"
       local NameI = Configs[2] or Configs.Name or "Section!!"
@@ -566,7 +710,6 @@ function RedzLib:MakeWindow(Configs)
       
       return Label
     end
-    
     function Tab:AddParagraph(Configs)
       local ParagraphName1 = Configs[1] or Configs.Name or "Paragraph!!"
       local ParagraphName2 = Configs[2] or Configs.Text or "Paragraph!!"
@@ -625,10 +768,10 @@ function RedzLib:MakeWindow(Configs)
       
       return Paragraph
     end
-    
     function Tab:AddButton(Configs)
       local BtnName = Configs[1] or Configs.Name or "Button!"
       local Callback = Configs[2] or Configs.Callback or function()end
+      local ImageButton = Configs[3] or Configs.ImageButton or "rbxassetid://15155219405"
       
       local ButtonF = ElementsHub:Button(Container, 25, {
         Name = "Frame"
@@ -641,24 +784,24 @@ function RedzLib:MakeWindow(Configs)
         Size = UDim2.new(1, -45, 1, 0),
         Position = UDim2.new(0, 10, 0, 0),
         BackgroundTransparency = 1,
-        ClipsDescendants = true,
         TextXAlignment = "Left",
         Font = ConfigsHub["Font"],
         TextWrapped = true
       })
       
       local Cursor = Create("ImageLabel", ButtonF, {
-        Image = Configs[3] or Configs.Cursor or "rbxassetid://15626116789",
+        Image = ImageButton,
         Size = UDim2.new(0, 20, 0, 20),
         AnchorPoint = Vector2.new(1, 0.5),
         Position = UDim2.new(1, -10, 0.5, 0),
         BackgroundTransparency = 1,
         ImageColor3 = ConfigsHub["Color Stroke"],
-        Rotation = -20
+        Rotation = 0
       })
       
       local SaveColor, IsPress
       ButtonF.MouseButton1Click:Connect(function()
+        Callback("Click")
         if not IsPress then
           IsPress = true
           task.spawn(function()CreateTween(Cursor, "ImageColor3", ConfigsHub["Color Theme"], 0.5, true)end)
@@ -667,7 +810,6 @@ function RedzLib:MakeWindow(Configs)
           CreateTween(TextLabel1, "TextColor3", ConfigsHub["Color Text"], 0.5, true)
           IsPress = false
         end
-        Callback("Click")
       end)
       
       TextLabel1.MouseEnter:Connect(function()
@@ -699,7 +841,6 @@ function RedzLib:MakeWindow(Configs)
       
       return Button
     end
-    
     function Tab:AddToggle(Configs)
       local TName = Configs[1] or Configs.Name or "Toggle!!"
       local Default = Configs[2] or Configs.Default or false
@@ -716,7 +857,6 @@ function RedzLib:MakeWindow(Configs)
         Size = UDim2.new(1, -60, 1, 0),
         Position = UDim2.new(0, 10, 0, 0),
         BackgroundTransparency = 1,
-        ClipsDescendants = true,
         TextXAlignment = "Left",
         Font = ConfigsHub["Font"],
         TextWrapped = true
@@ -798,7 +938,6 @@ function RedzLib:MakeWindow(Configs)
         
       return Toggle
     end
-    
     function Tab:AddSlider(Configs)
       local SName = Configs[1] or Configs.Name or "Slider!!"
       local Increase = Configs[5] or Configs.Increase or 1
@@ -869,12 +1008,6 @@ function RedzLib:MakeWindow(Configs)
       
       local MouseOn, AtualValue
       
-      local function Set(NewVal)
-        if typeof(NewVal) == "number" then
-          
-        end
-      end
-      
       local function UpdateLabel(NewValue)
         local Number = tostring(NewValue * Increase)
         
@@ -911,13 +1044,19 @@ function RedzLib:MakeWindow(Configs)
         UpdateLabel(NewValue)
       end)
       
+      local function SetSlider(NewVal)
+        local SliderPos = (math.clamp(NewVal, Min, Max) - Min) / (Max - Min)
+        
+        task.spawn(CreateTween, SliderIcon, "Position", UDim2.new(SliderPos, 0, 0.5, 0), 0.5, false)
+      end
+      
       local Slider = {}
       
       function Slider:Set(val1)
         if typeof(val1) == "function" then Callback = val1
         elseif typeof(val1) == "Color3" then TextLabel1.TextColor3 = val1
         elseif typeof(val1) == "string" then TextLabel1.Text = val1
-        elseif typeof(val1) == "number" then Set(val1) end
+        elseif typeof(val1) == "number" then SetSlider(val1) end
       end
       
       function Slider:Visible(Bool)
@@ -930,7 +1069,6 @@ function RedzLib:MakeWindow(Configs)
       
       return Slider
     end
-    
     function Tab:AddDiscordInvite(Configs)
       local DiscordLink = Configs[1] or Configs.DiscordLink or "https://discord.gg/"
       local DiscordIcon = Configs[2] or Configs.DiscordIcon or "rbxassetid://"
@@ -1003,8 +1141,27 @@ function RedzLib:MakeWindow(Configs)
           JoinClick = false
         end
       end)
+      
+      local DiscordInvite = {}
+      
+      function DiscordInvite:Set(NewVal)
+        if typeof(NewVal) == "string" then
+          if string.find(NewVal, "https://discord.gg/") then LinkLabel.Text = NewVal
+          elseif string.find(NewVal, "rbxassetid://") then IconLabel.Image = NewVal
+          else TitleLabel.Text = NewVal end
+        end
+      end
+      
+      function DiscordInvite:Visible(Bool)
+        Frame1.Visible = Bool
+      end
+      
+      function DiscordInvite:Destroy()
+        Frame1:Destroy()
+      end
+      
+      return DiscordInvite
     end
-    
     function Tab:AddTextBox(Configs)
       local TName = Configs[1] or Configs.Name or "Text Box!!"
       local Default = Configs[2] or Configs.Default or ""
@@ -1086,7 +1243,6 @@ function RedzLib:MakeWindow(Configs)
       
       return TextBoxF
     end
-    
     function Tab:AddDropdown(Configs)
       local DName = Configs[1] or Configs.Name or "Dropdown!!"
       local Options = Configs[2] or Configs.Options or {"1", "2", "3"}
@@ -1157,7 +1313,7 @@ function RedzLib:MakeWindow(Configs)
         Padding = UDim.new(0, 5)
       })
       
-      local OptionsC, SelectedOption = {}, "", {}
+      local OptionsC, SelectedOption, SelectedOptionT = {}, "", {}
       local function Void()
         table.foreach(ContainerList:GetChildren(), function(a, b)
           if b:IsA("TextButton") then
@@ -1165,14 +1321,31 @@ function RedzLib:MakeWindow(Configs)
           end
         end)
         TextLabel2.Text = "..."
+        SelectedOptionT = {}
         OptionsC = {}
+      end
+      
+      local function SetLabelTable()
+        local str, first = ""
+        table.foreach(SelectedOptionT, function(a, b)
+          if first then
+            str = str .. ", "
+          end
+          str = str .. b
+          first = true
+        end)
+        TextLabel2.Text = str
       end
       
       local function RemoveOption(name)
         local Option = ContainerList:FindFirstChild(name)
         if Option then
           Option:Destroy()
-          table.remove(OptionsC, name)
+          table.foreach(OptionsC, function(a, b)
+            if b == name then
+              table.remove(OptionsC, a)
+            end
+          end)
         end
       end
       
@@ -1257,20 +1430,42 @@ function RedzLib:MakeWindow(Configs)
             BackgroundColor3 = ConfigsHub["Color Theme"]
           })ElementsHub:Corner(Selected)
           
+          local OnOff
           if name == Default or table.find(SelectedOptionT, name) then
             task.spawn(function()CreateTween(Selected, "BackgroundTransparency", 0, 0.2, true)end)
             task.spawn(function()CreateTween(TextLabel, "TextColor3", ConfigsHub["Color Text"], 0.2, true)end)
             task.spawn(function()CreateTween(Frame, "BackgroundTransparency", 0.7, 0.2, true)end)
-            SetLabelToggle()
+            if not table.find(SelectedOptionT, name) then
+              table.insert(SelectedOptionT, name)
+            end
+            Callback(SelectedOptionT)
+            OnOff = true
+            SetLabelTable()
           end
           
           Frame.MouseButton1Click:Connect(function()
-            task.spawn(function()CreateTween(Selected, "BackgroundTransparency", 0, 0.2, true)end)
-            task.spawn(function()CreateTween(TextLabel, "TextColor3", ConfigsHub["Color Text"], 0.2, true)end)
-            task.spawn(function()CreateTween(Frame, "BackgroundTransparency", 0.7, 0.2, true)end)
-            SelectedOption = name
-            TextLabel2.Text = name
-            Callback(name)
+            OnOff = not OnOff
+            if OnOff then
+              task.spawn(function()CreateTween(Selected, "BackgroundTransparency", 0, 0.2, true)end)
+              task.spawn(function()CreateTween(TextLabel, "TextColor3", ConfigsHub["Color Text"], 0.2, true)end)
+              task.spawn(function()CreateTween(Frame, "BackgroundTransparency", 0.7, 0.2, true)end)
+              if not table.find(SelectedOptionT, name) then
+                table.insert(SelectedOptionT, name)
+              end
+              Callback(SelectedOptionT)
+              SetLabelTable()
+            else
+              task.spawn(CreateTween, Selected, "BackgroundTransparency", 1, 0.2, true)
+              task.spawn(CreateTween, TextLabel, "TextColor3", ConfigsHub["Color Dark Text"], 0.2, true)
+              task.spawn(CreateTween, Frame, "BackgroundTransparency", 1, 0.2, true)
+              table.foreach(SelectedOptionT, function(a, b)
+                if b == name then
+                  table.remove(SelectedOptionT, a)
+                end
+              end)
+              Callback(SelectedOptionT)
+              SetLabelTable()
+            end
           end)
         end
         
@@ -1282,6 +1477,7 @@ function RedzLib:MakeWindow(Configs)
           table.foreach(val, function(a, b)
             if not table.find(OptionsC, b) then
               if MultSelect then
+                CreateToggle(b)
               else
                 CreateButton(b)
               end
@@ -1348,14 +1544,13 @@ function RedzLib:MakeWindow(Configs)
       
       return DropdownF
     end
-    
     function Tab:AddColorpicker(Configs)
       local CName = Configs[1] or Configs.Name or "Colorpicker"
       local DefaultColor = Configs[2] or Configs.Default or Color3.fromRGB(0, 120, 50)
       local Callback = Configs[3] or Configs.Callback or function()end
       
       local DColorHSV = Color3.toHSV(DefaultColor)
-      local ColorH, ColorS, ColorV = select(1, DColorHSV), select(2, DColorHSV), select(3, DColorHSV)
+      local ColorH, ColorS, ColorV = Color3.toHSV(DefaultColor)
       
       local Frame = Create("TextButton", Container, {
         BackgroundColor3 = ConfigsHub["Color Hub 2"],
@@ -1400,29 +1595,93 @@ function RedzLib:MakeWindow(Configs)
         Position = UDim2.new(0, 10, 0.5, 0),
         AnchorPoint = Vector2.new(0, 0.5),
         AutoButtonColor = false,
-        Image = "rbxassetid://6333902413"
+        Image = "rbxassetid://4155801252"
       })ElementsHub:Corner(Select1)local BaseMousePos1 = Create("Frame", Select1, {
         Visible = false
       })
       
-      local Select2 = Create("ImageButton", Select1, {
-        Size = UDim2.new(0, 25, 1, -20),
-        Position = UDim2.new(1, 10, 0, 0),
+      local Select2 = Create("ImageButton", ColorpickerC, {
+        Size = UDim2.new(1, -210, 0, 20),
+        Position = UDim2.new(1, -10, 0, 10),
+        AnchorPoint = Vector2.new(1, 0),
         AutoButtonColor = false
       })ElementsHub:Corner(Select2)local BaseMousePos2 = Create("Frame", Select2, {
         Visible = false
       })Create("UIGradient", Select2, {
-        Rotation = 90,
+        Rotation = 0,
         Color = ColorSequence.new({
-          ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 255, 255)),
-          ColorSequenceKeypoint.new(1.00, Color3.fromRGB()),
+          ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 4)),
+          ColorSequenceKeypoint.new(0.20, Color3.fromRGB(234, 255, 0)),
+          ColorSequenceKeypoint.new(0.40, Color3.fromRGB(21, 255, 0)),
+          ColorSequenceKeypoint.new(0.60, Color3.fromRGB(0, 255, 255)),
+          ColorSequenceKeypoint.new(0.80, Color3.fromRGB(0, 17, 255)),
+          ColorSequenceKeypoint.new(0.90, Color3.fromRGB(255, 0, 251)),
+          ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 4))
         })
+      })
+      
+      local Label1, Label2, Label3
+      local S1 = Create("TextBox", ColorpickerC, {
+        Size = UDim2.new(0, 40, 0, 20),
+        Position = UDim2.new(1, -10, 0, 35),
+        AnchorPoint = Vector2.new(1, 0),
+        BackgroundColor3 = ConfigsHub["Color Hub 2"],
+        Font = ConfigsHub["Font"],
+        TextColor3 = ConfigsHub["Color Text"],
+        TextScaled = true,
+        ClearTextOnFocus = false
+      })ElementsHub:Corner(S1)ElementsHub:Stroke(S1)Create("TextLabel", S1, {
+        Size = UDim2.new(0, 20, 0, 20),
+        AnchorPoint = Vector2.new(1, 0),
+        TextColor3 = Color3.fromRGB(255, 0, 0),
+        TextScaled = true,
+        BackgroundTransparency = 1,
+        Text = "R",
+        Font = ConfigsHub["Font"]
+      })
+      
+      local S2 = Create("TextBox", ColorpickerC, {
+        Size = UDim2.new(0, 40, 0, 20),
+        Position = UDim2.new(1, -10, 0, 60),
+        AnchorPoint = Vector2.new(1, 0),
+        BackgroundColor3 = ConfigsHub["Color Hub 2"],
+        Font = ConfigsHub["Font"],
+        TextColor3 = ConfigsHub["Color Text"],
+        TextScaled = true,
+        ClearTextOnFocus = false
+      })ElementsHub:Corner(S2)ElementsHub:Stroke(S2)Create("TextLabel", S2, {
+        Size = UDim2.new(0, 20, 0, 20),
+        AnchorPoint = Vector2.new(1, 0),
+        TextColor3 = Color3.fromRGB(0, 255, 0),
+        TextScaled = true,
+        BackgroundTransparency = 1,
+        Text = "G",
+        Font = ConfigsHub["Font"]
+      })
+    
+      local S3 = Create("TextBox", ColorpickerC, {
+        Size = UDim2.new(0, 40, 0, 20),
+        Position = UDim2.new(1, -10, 0, 85),
+        AnchorPoint = Vector2.new(1, 0),
+        BackgroundColor3 = ConfigsHub["Color Hub 2"],
+        Font = ConfigsHub["Font"],
+        TextColor3 = ConfigsHub["Color Text"],
+        TextScaled = true,
+        ClearTextOnFocus = false
+      })ElementsHub:Corner(S3)ElementsHub:Stroke(S3)Create("TextLabel", S3, {
+        Size = UDim2.new(0, 20, 0, 20),
+        AnchorPoint = Vector2.new(1, 0),
+        TextColor3 = Color3.fromRGB(0, 0, 255),
+        TextScaled = true,
+        BackgroundTransparency = 1,
+        Text = "B",
+        Font = ConfigsHub["Font"]
       })
       
       local Mouse1 = Create("Frame", Select1, {
         Size = UDim2.new(0, 15, 0, 15),
         AnchorPoint = Vector2.new(0.5, 0.5),
-        Position = UDim2.new(ColorS, 0, ColorH, 0),
+        Position = UDim2.new(1 - ColorS, 0, 1 - ColorV, 0),
         BackgroundTransparency = 1
       })ElementsHub:Corner(Mouse1, {CornerRadius = UDim.new(0, 1e4)})Create("UIStroke", Mouse1, {
         Thickness = 1.2,
@@ -1430,9 +1689,9 @@ function RedzLib:MakeWindow(Configs)
       })
       
       local Mouse2 = Create("Frame", Select2, {
-        Size = UDim2.new(1, 0, 0, 10),
+        Size = UDim2.new(0, 8, 1, 0),
         AnchorPoint = Vector2.new(0.5, 0.5),
-        Position = UDim2.new(0.5, 0, ColorV, 0),
+        Position = UDim2.new(ColorH, 0, 0.5, 0),
         BackgroundTransparency = 1
       })ElementsHub:Corner(Mouse2, {CornerRadius = UDim.new(0, 1e4)})Create("UIStroke", Mouse2, {
         Thickness = 1.2,
@@ -1440,53 +1699,52 @@ function RedzLib:MakeWindow(Configs)
       })
       
       local function ConfigureColor()
+        ColorH = Mouse2.Position.X.Scale
+        ColorS = 1 - Mouse1.Position.X.Scale
+        ColorV = 1 - Mouse1.Position.Y.Scale
         
-      end
+        Select1.ImageColor3 = Color3.fromHSV(ColorH, 1, 1)
+        ColorSelected.BackgroundColor3 = Color3.fromHSV(ColorH, ColorS, ColorV)
+        Callback(Color3.fromHSV(ColorH, ColorS, ColorV))
+      end;ConfigureColor()
       
-      local Mouse1On, Mouse2On
-      local function ControlMouse1()
-        while Mouse1On do task.wait()
-          local MousePos = GetMousePos()
-          local APosX = MousePos.X - BaseMousePos1.AbsolutePosition.X
-          local APosY = MousePos.Y - BaseMousePos1.AbsolutePosition.Y
-          local BPosX = APosX / Select1.AbsoluteSize.X
-          local BPosY = APosY / Select1.AbsoluteSize.Y
-          
-          Mouse1.Position = UDim2.new(math.clamp(BPosX, 0, 1), 0, math.clamp(BPosY, 0, 1), 0)
+      local Mouse1Input, Mouse2Input, Minimized, WaitClick
+      Select1.InputBegan:Connect(function(Input)
+        if Minimized and not WaitClick and not Mouse2Input then
+          if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+            Container.ScrollingEnabled, Mouse1Input = false, true
+            while UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do task.wait()
+              local MousePos = GetMousePos()
+              local APosX = MousePos.X - BaseMousePos1.AbsolutePosition.X
+              local APosY = MousePos.Y - BaseMousePos1.AbsolutePosition.Y
+              local BPosX = APosX / Select1.AbsoluteSize.X
+              local BPosY = APosY / Select1.AbsoluteSize.Y
+              
+              Mouse1.Position = UDim2.new(math.clamp(BPosX, 0, 1), 0, math.clamp(BPosY, 0, 1), 0)
+              ConfigureColor()
+            end
+            Container.ScrollingEnabled, Mouse1Input = true, false
+          end
         end
-      end
+      end)
       
-      local function ControlMouse2()
-        while Mouse2On do task.wait()
-          local MousePos = GetMousePos()
-          local APosY = MousePos.Y - BaseMousePos2.AbsolutePosition.Y
-          local BPosY = APosY / Select2.AbsoluteSize.Y
-          
-          Mouse2.Position = UDim2.new(0.5, 0, math.clamp(BPosY, 0, 1), 0)
-          ColorH = math.clamp(BPosY, 0, 1)
-          ConfigureColor()
+      Select2.InputBegan:Connect(function(Input)
+        if Minimized and not WaitClick and not Mouse1Input then
+          if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+            Container.ScrollingEnabled, Mouse2Input = false, true
+            while UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do task.wait()
+              local MousePos = GetMousePos()
+              local APosX = MousePos.X - BaseMousePos2.AbsolutePosition.X
+              local BPosX = APosX / Select2.AbsoluteSize.X
+              
+              Mouse2.Position = UDim2.new(math.clamp(BPosX, 0, 1), 0, 0.5, 0)
+              ConfigureColor()
+            end
+            Container.ScrollingEnabled, Mouse2Input = true, false
+          end
         end
-      end
-      
-      Select1.MouseLeave:Connect(function()
-        Mouse1On = false
       end)
       
-      Select1.MouseButton1Down:Connect(function()
-        Mouse1On = true
-        ControlMouse1()
-      end)
-      
-      Select2.MouseLeave:Connect(function()
-        Mouse2On = false
-      end)
-      
-      Select2.MouseButton1Down:Connect(function()
-        Mouse2On = true
-        ControlMouse2()
-      end)
-      
-      local Minimized, WaitClick
       Frame.MouseButton1Click:Connect(function()
         if not WaitClick then
           WaitClick = true
@@ -1500,17 +1758,153 @@ function RedzLib:MakeWindow(Configs)
         end
       end)
       
+      local function SetColor(Color)
+        local H, S, V = Color3.toHSV(Color)
+        
+        ColorH = H
+        ColorS = 1 - S
+        ColorV = 1 - V
+        
+        task.spawn(CreateTween, Mouse1, "Position", UDim2.new(ColorS, 0, ColorV, 0), 0.3, true)
+        task.spawn(CreateTween, Mouse2, "Position", UDim2.new(ColorH, 0, 0.5, 0), 0.3, true)
+        task.spawn(CreateTween, ColorSelected, "BackgroundColor3", Color, 0.3, true)
+        task.spawn(CreateTween, Select1, "ImageColor3", Color3.fromHSV(ColorH, 1, 1), 0.3, true)
+        Callback(Color)
+      end
+      
+      task.spawn(function()
+        local Saved1, Saved2, Saved3
+        local function UPD()
+          SetColor(Color3.fromRGB(Saved1, Saved2, Saved3))
+        end
+        
+        local function UPD1()if tonumber(S1.Text) then local number = math.clamp(tonumber(S1.Text), 0, 255)
+        S1.Text = tostring(number)Saved1 = S1.Text else S1.Text = Saved1 end UPD()end
+        local function UPD2()if tonumber(S2.Text) then local number = math.clamp(tonumber(S2.Text), 0, 255)
+        S2.Text = tostring(number)Saved2 = S2.Text else S2.Text = Saved2 end UPD()end
+        local function UPD3()if tonumber(S3.Text) then local number = math.clamp(tonumber(S3.Text), 0, 255)
+        S3.Text = tostring(number)Saved3 = S3.Text else S3.Text = Saved3 end UPD()end
+        
+        local function SetToColor()
+          local str = tostring((ColorSelected.BackgroundColor3)):gsub(" ", "")
+          local color = str:split(",")
+          
+          color[1] = tostring(math.ceil(tonumber(color[1] * 255)))
+          color[2] = tostring(math.ceil(tonumber(color[2] * 255)))
+          color[3] = tostring(math.ceil(tonumber(color[3] * 255)))
+          
+          S1.Text = color[1]
+          S2.Text = color[2]
+          S3.Text = color[3]
+        end
+        
+        S1.FocusLost:Connect(UPD1)
+        S2.FocusLost:Connect(UPD2)
+        S3.FocusLost:Connect(UPD3)
+        
+        local str = tostring((DefaultColor)):gsub(" ", "")
+        local color = str:split(",")
+        
+        color[1] = tostring(math.ceil(tonumber(color[1] * 255)))
+        color[2] = tostring(math.ceil(tonumber(color[2] * 255)))
+        color[3] = tostring(math.ceil(tonumber(color[3] * 255)))
+        
+        S1.Text = color[1]
+        S2.Text = color[2]
+        S3.Text = color[3]
+        
+        ColorSelected:GetPropertyChangedSignal("BackgroundColor3"):Connect(SetToColor)
+      end)
+    
       local Colorpicker = {}
       
+      function Colorpicker:Set(val1)
+        if typeof(val1) == "function" then Callback = val1
+        elseif typeof(val1) == "Color3" then SetColor(val1)
+        elseif typreof(val1) == "string" then TextLabel1.Text = val1 end
+      end
+      
       function Colorpicker:Destroy()
-        
+        Frame:Destroy()
       end
       
       function Colorpicker:Visible(Bool)
-        
+        Frame.Visible = Bool
       end
       
       return Colorpicker
+    end
+    function Tab:AddKeybind(Configs)
+      local KName = Configs[1] or Configs.Name or "Keybind"
+      local KeyInput = Configs[2] or Configs.Key or "E"
+      local Callback = Configs[3] or Configs.Callback or function()end
+      
+      local Frame = Create("Frame", Container, {
+        Size = UDim2.new(1, 0, 0, 25),
+        BackgroundColor3 = ConfigsHub["Color Hub 2"],
+      })ElementsHub:Corner(Frame)ElementsHub:Stroke(Frame)
+      
+      local TextLabel1 = Create("TextLabel", Frame, {
+        TextSize = 15,
+        TextColor3 = ConfigsHub["Color Text"],
+        Text = KName,
+        Size = UDim2.new(1, -45, 1, 0),
+        Position = UDim2.new(0, 10, 0, 0),
+        BackgroundTransparency = 1,
+        TextXAlignment = "Left",
+        Font = ConfigsHub["Font"],
+        TextWrapped = true
+      })TextSetColor(TextLabel1)
+      
+      local KeyLabel = Create("TextBox", Frame, {
+        Size = UDim2.new(0, 18, 0, 18),
+        Text = KeyInput,
+        TextSize = 15,
+        Font = ConfigsHub["Font"],
+        TextColor3 = ConfigsHub["Color Text"],
+        BackgroundTransparency = 1,
+        Position = UDim2.new(1, -10, 0.5, 0),
+        AnchorPoint = Vector2.new(1, 0.5),
+        ClearTextOnFocus = false
+      })ElementsHub:Corner(KeyLabel)ElementsHub:Stroke(KeyLabel)
+      
+      local function GetUpString(String)
+        local str
+        table.foreach(string.split(String, ""), function(a, b)
+          if not string.find(b, " ") then
+            str = b
+          end
+        end)
+        return string.upper(str)
+      end
+      
+      local MouseInKeyLabel
+      KeyLabel:GetPropertyChangedSignal("Text"):Connect(function()
+        KeyInput = GetUpString(KeyLabel.Text)
+        KeyLabel.Text = KeyInput
+      end)
+      
+      KeyLabel.FocusLost:Connect(function()
+        if #string.split(KeyLabel.Text, "") < 1 then
+          KeyLabel.Text = KeyInput
+        end
+      end)
+      
+      UserInputService.InputBegan:Connect(function(Input)
+        
+      end)
+      
+      UserInputService.InputBegan:Connect(function(Input)
+        if Input.KeyCode == Enum.KeyCode[KeyInput] then
+          Callback()
+        end
+      end)
+      
+      local Keybind = {}
+      
+      
+      
+      return Keybind
     end
     
     IsFirst = false
@@ -1520,67 +1914,4 @@ function RedzLib:MakeWindow(Configs)
   return Window
 end
 
-local Window = RedzLib:MakeWindow({
-  Menu = {
-    Title = "REDz HUB teste"
-  },
-  Animation = {
-    Title = "by : redz9999"
-  }
-})
-
--- Criar Tab
-local Tab1 = Window:MakeTab({"Main", "rbxassetid://13687632207"})
-local Tab2 = Window:MakeTab({"Player", "rbxassetid://13687632207"})
-Window:Separator()
-local Tab3 = Window:MakeTab({"Misc", "rbxassetid://13687780725"})
--- Tab4:Destroy()
-Tab1:Set("Bom Dia", "rbxassetid://13687698628")
-Tab2:AddSection({"Zé da manga"})
-Tab2:AddLabel({"Text", "Bom Dia Caralho!!"})
-Tab2:AddLabel({"Image", "Um Carro", "rbxassetid://13687698628"})
-Tab2:AddParagraph({Name = "Name", Text = "Text"})
-
-local Button = Tab1:AddButton({})
-local Toggle = Tab1:AddToggle({"Toggle Teste", false, function(Value)
-  Button:Set(tostring(Value))
-end})
-Toggle:Set("Atualizar Label")
-Toggle:Set(true)
-Toggle:Set(Color3.fromRGB(255, 0, 0))
-
-local Slider = Tab1:AddSlider({
-  Name = "Slider Teste",
-  MinValue = 30,
-  MaxValue = 1000,
-  Default = 0,
-  Increase = 1,
-  Callback = function(Value)
-    Player.Character.Humanoid.WalkSpeed = Value
-  end
-})Slider:Set(100)
-
-Tab3:AddDiscordInvite({DiscordIcon = "rbxassetid://15298567397",DiscordTitle = "REDz Hub | Community",DiscordLink = "https://discord.gg/7aR7kNVt4g"})
-local Slider = Tab3:AddSlider({
-  Name = "Background Color",
-  MinValue = 0,
-  MaxValue = 1,
-  Default = 0,
-  Increase = 0.1,
-  Callback = function(Value)
-    Window:Set(Value)
-  end
-})
-
-local a = Tab1:AddTextBox({})
-Tab1:AddDropdown({
-  Name = "Numeros",
-  Options = {"Melee", "Sword", "Blox Fruit"},
-  Default = "Melee",
-  MultSelect = false,
-  Callback = function(Value)
-    Button:Set(Value)
-  end
-})
-
-Tab1:AddColorpicker({})
+return RedzLib
