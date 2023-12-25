@@ -1053,6 +1053,8 @@ function RedzLib:MakeWindow(Configs)
         task.spawn(CreateTween, SliderIcon, "Position", UDim2.new(SliderPos, 0, 0.5, 0), 0.5, false)
       end
       
+      SetSlider(Default)
+      
       local Slider = {}
       
       function Slider:Set(val1)
