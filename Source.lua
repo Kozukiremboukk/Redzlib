@@ -473,11 +473,36 @@ function RedzLib:MakeWindow(Configs)
         ControlGuiSize.Draggable = true
         Minimized, WaitPress = false, false
       end
-      
-      
     end)
   end)
   local Window = {}
+  function Window:MinimizeButton(Configs)
+    local BType = Configs.Type or "Image"
+    local BNameImage = BType == "Image" and Configs.Image or Configs.Text or "Bah"
+    local BColor = Configs.Color or Color3.fromRGB(255, 255, 255)
+    local BSize = Configs.Size or {30, 30}
+    local BCorner = Configs.UICorner or true
+    local BStroke = Configs.UIStroke or true
+    local BTransparency = Configs.BackgroundTransparency or 0
+    
+    local Button = Create(BType .. "Label", ScreenGui, {
+      BackgroundColor3 = ConfigsHub["Color Hub 1"],
+      BackgroundTransparency = BTransparency,
+      Size = UDim2.fromOffset(unpack(BSize)),
+      Position = UDim2.new(0.15, 0, 0.15, 0),
+      Active = true,
+      Draggable = true
+    })
+    
+    if BType == "Image" then
+      Button.Image = BNameImage
+      Button.ImageColor3 = BColor
+    else
+      Button.Text = BNameImage
+      Button.TextColor3 = BColor
+    end
+    if BCorner then ElementsHub:Corner(Button)end
+    if BStroke then ElementsHub:Stroke(Button)end
   local IsFirst = true
   function Window:Set(val1)
     if typeof(val1) == "number" then
@@ -1048,7 +1073,8 @@ function RedzLib:MakeWindow(Configs)
       end)
       
       local function SetSlider(NewVal)
-        local SliderPos = (math.clamp(NewVal, Min, Max) - Min) / (Max - Min)
+        local max, min = MaxValue * Increase, MinValue * Increase
+        local SliderPos = (math.clamp(NewValue, Min, Max) - min / (max - min))
         
         task.spawn(CreateTween, SliderIcon, "Position", UDim2.new(SliderPos, 0, 0.5, 0), 0.5, false)
       end
