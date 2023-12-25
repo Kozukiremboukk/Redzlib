@@ -494,17 +494,13 @@ function RedzLib:MakeWindow(Configs)
       Draggable = true
     })
     
-    local UIScale = Create("UIScale", MainFrame)
-    
     local Minimized, WaitClick
     Button.MouseButton1Click:Connect(function()
       if not WaitClick then
         WaitClick = true
         if Minimized then
           MainFrame.Visible = true
-          CreateTween(UIScale, "Scale", 1, 0.2, true)
         else
-          CreateTween(UIScale, "Scale", 0, 0.2, true)
           MainFrame.Visible = false
         end
         WaitClick = false
