@@ -6,7 +6,7 @@ local UserInputService = game:GetService("UserInputService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local Player = Players.LocalPlayer
 local ViewportSize = workspace.CurrentCamera.ViewportSize
-local UIScale = ViewportSize.Y / 525
+local UIScale = ViewportSize.Y / 550
 
 local RedzLib = {
   PlayerName = Player.Name,
@@ -1966,18 +1966,4 @@ function RedzLib:MakeWindow(Configs)
   return Window
 end
 
-local Window = RedzLib:MakeWindow({
-  Menu = {
-    Title = "REDz HUB teste",
-  },
-  LoadAnim = {
-    Active = true,
-    Title = "by : redz9999",
-    WaitTime = 0.5
-  }
-})
-
-Window:MinimizeButton({
-  Type = "Image",
-  Image = "rbxassetid://15298567397"
-})
+return RedzLib
