@@ -1096,7 +1096,7 @@ function RedzLib:MakeWindow(Configs)
 			function SetSlider(Value)
         local Min, Max = Min * Increase, Max * Increase
         
-        local SliderPos = (NewValue - Min) / (Max - Min)
+        local SliderPos = (Value - Min) / (Max - Min)
         
         SliderIcon.Position = UDim2.fromScale(math.clamp(SliderPos, 0, 1), 0.5)
 			end SetSlider(Default)
