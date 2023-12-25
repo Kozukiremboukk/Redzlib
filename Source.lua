@@ -6,7 +6,7 @@ local UserInputService = game:GetService("UserInputService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local Player = Players.LocalPlayer
 local ViewportSize = workspace.CurrentCamera.ViewportSize
-local UIScale = ViewportSize.Y / 500
+local UIScale = ViewportSize.Y / 525
 
 local RedzLib = {
   PlayerName = Player.Name,
@@ -878,16 +878,19 @@ function RedzLib:MakeWindow(Configs)
       })ElementsHub:Corner(T2, {CornerRadius = UDim.new(0, 1e3)})
       
       if Default then
-        task.spawn(function()CreateTween(T2, "AnchorPoint", Vector2.new(1, 0.5), 0.3, false)end)
-        task.spawn(function()CreateTween(T2, "Position", UDim2.new(1, -1.8, 0.5, 0), 0.3, false)end)
-        Callback(true)
+        task.spawn(CreateTween, T2, "AnchorPoint", Vector2.new(1, 0.5), 0.2, false)
+        task.spawn(CreateTween, T2, "Position", UDim2.new(1, -1.8, 0.5, 0), 0.2, false)
+        task.spawn(CreateTween, T2, "BackgroundColor3", ConfigsHub["Color Theme"], 0.2, false)
+        task.spawn(CreateTween, Stroke, "Color", ConfigsHub["Color Theme"], 0.2, false)
+        task.spawn(CreateTween, TextLabel1, "TextColor3", ConfigsHub["Color Theme"], 0.2, false)
+        task.spawn(Callback, true)
       else
-        Callback(false)
+        task.spawn(Callback, false)
       end
   
       local ToggleVal = Default
       local function Set(Val)
-        Callback(Val)ToggleVal = Val
+        task.spawn(Callback, Val)ToggleVal = Val
         if not Val then
           task.spawn(function()CreateTween(T2, "AnchorPoint", Vector2.new(0, 0.5), 0.2, false)end)
           task.spawn(function()CreateTween(T2, "Position", UDim2.new(0, 1.8, 0.5, 0), 0.2, false)end)
@@ -895,11 +898,11 @@ function RedzLib:MakeWindow(Configs)
           task.spawn(function()CreateTween(Stroke, "Color", ConfigsHub["Color Stroke"], 0.2, false)end)
           task.spawn(function()CreateTween(TextLabel1, "TextColor3", ConfigsHub["Color Text"], 0.2, false)end)
         else
-          task.spawn(function()CreateTween(T2, "AnchorPoint", Vector2.new(1, 0.5), 0.2, false)end)
-          task.spawn(function()CreateTween(T2, "Position", UDim2.new(1, -1.8, 0.5, 0), 0.2, false)end)
-          task.spawn(function()CreateTween(T2, "BackgroundColor3", ConfigsHub["Color Theme"], 0.2, false)end)
-          task.spawn(function()CreateTween(Stroke, "Color", ConfigsHub["Color Theme"], 0.2, false)end)
-          task.spawn(function()CreateTween(TextLabel1, "TextColor3", ConfigsHub["Color Theme"], 0.2, false)end)
+          task.spawn(CreateTween, T2, "AnchorPoint", Vector2.new(1, 0.5), 0.2, false)
+          task.spawn(CreateTween, T2, "Position", UDim2.new(1, -1.8, 0.5, 0), 0.2, false)
+          task.spawn(CreateTween, T2, "BackgroundColor3", ConfigsHub["Color Theme"], 0.2, false)
+          task.spawn(CreateTween, Stroke, "Color", ConfigsHub["Color Theme"], 0.2, false)
+          task.spawn(CreateTween, TextLabel1, "TextColor3", ConfigsHub["Color Theme"], 0.2, false)
         end
       end
       
