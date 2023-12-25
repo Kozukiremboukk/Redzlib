@@ -1093,12 +1093,17 @@ function RedzLib:MakeWindow(Configs)
         UpdateLabel(NewValue)
       end)
       
-      local function SetSlider(NewVal)
-        local mx, mn = Max * Increase, Min * Increase
-        local SliderPos = (NewVal - mn) / (mx - mn)
-        
-        task.spawn(CreateTween, SliderIcon, "Position", UDim2.new(SliderPos, 0, 0.5, 0), 0.5, false)
-      end SetSlider(Default)
+      local function Round(Number, Factor)
+      	local Result = math.floor(Number/Factor + (math.sign(Number) * 0.5)) * Factor
+      	if Result < 0 then Result = Result + Factor end
+      	return Result
+      end
+      
+			function SetSlider(Value)
+				Value = math.clamp(Round(Value, Increase), Min, Max)
+				local UDim = UDim2.fromScale((Value - Min) / (Max - Min), 0.5)
+				CreateTween(SliderIcon, "Position", UDim, 0.3, true)
+			end SetSlider(Default)
       
       local Slider = {}
       
