@@ -1094,13 +1094,11 @@ function RedzLib:MakeWindow(Configs)
       end)
       
       local function SetSlider(NewVal)
-        local max, min = Max * Increase, Min * Increase
-        local SliderPos = (math.clamp(NewVal, max, min) - min / (max - min))
+        local Max, Min = Max * Increase, Min * Increase
+        local SliderPos = (math.clamp(NewVal, Max, Min) - Min / (Max - Min))
         
         task.spawn(CreateTween, SliderIcon, "Position", UDim2.new(SliderPos / Increase, 0, 0.5, 0), 0.5, false)
-      end
-      
-      SetSlider(Default)
+      end SetSlider(Default)
       
       local Slider = {}
       
