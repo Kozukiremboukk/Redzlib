@@ -253,11 +253,11 @@ function RedzLib:MakeNotify(Configs)
 end
 
 function RedzLib:MakeWindow(Configs)
-  local HubTitle = Configs.Menu.Title or "Redz Library"
-  local HubMiniText = Configs[2] or Configs.MiniText or "by : redz9999"
+  local Menu = Configs[1] or Configs.Menu or {}
+  local HubTitle = Menu[1] or Menu.Title or "Redz Library"
   
-  local Animation = Configs.Animation or {}
-  local AnimationTitle = Animation.Title or "redz library"
+  local Animation = Configs[2] or Configs.Animation or {}
+  local AnimationText = Animation[1] or Animation.Text or "by : redz9999"
   
   local StartSize = 150
   local TabSize = 30
@@ -270,6 +270,22 @@ function RedzLib:MakeWindow(Configs)
     Draggable = true
   })ElementsHub:Corner(MainFrame, {CornerRadius = UDim.new(0, 8)})
   
+  local NotifyFrame = Create("TextLabel", ScreenGui, {
+    BackgroundColor3 = ConfigsHub["Color Hub 1"],
+    Text = AnimationText,
+    TextColor3 = ConfigsHub["Color Text"],
+    ClipsDescendants = true,
+    TextSize = 14,
+    Font = ConfigsHub["Font"],
+    Position = UDim2.new(0.5, 0, 0.5, 0),
+    AnchorPoint = Vector2.new(0.5, 0.5)
+  })ElementsHub:Corner(NotifyFrame)
+  
+  CreateTween(NotifyFrame, "Size", UDim2.new(0, 140, 0, 0), 0.2, 0)
+  CreateTween(NotifyFrame, "Size", UDim2.new(0, 140, 0, 20), 0.2, 0)task.wait(2)
+  CreateTween(NotifyFrame, "Size", UDim2.new(0, 0, 0, 20), 0.2, 0)
+  CreateTween(NotifyFrame, "Size", UDim2.new(), 0.4, 0)
+  NotifyFrame:Destroy()
   CreateTween(MainFrame, "Size", UDim2.new(0, 0, 0, 30), 0.1, true)
   CreateTween(MainFrame, "Size", UDim2.new(0, 550, 0, 30), 0.4, true)
   CreateTween(MainFrame, "Size", UDim2.new(0, 550, 0, 310), 0.4, true)
@@ -278,14 +294,14 @@ function RedzLib:MakeWindow(Configs)
     Size = UDim2.new(1, 0, 0, TabSize),
     BackgroundTransparency = 1
   })Create("TextLabel", TopBar, {
-    Size = UDim2.new(1, -80, 1, 0),
+    Size = UDim2.new(0, 0, 1, 0),
+    AutomaticSize = "X",
     Position = UDim2.new(0, 25, 0, 0),
     Text = HubTitle,
     TextXAlignment = "Left",
     TextSize = 20,
     BackgroundTransparency = 1,
     TextColor3 = ConfigsHub["Color Text"],
-    ClipsDescendants = true,
     Font = ConfigsHub["Font"]
   })
   
@@ -482,7 +498,9 @@ function RedzLib:MakeWindow(Configs)
     local BColor = Configs.Color or Color3.fromRGB(255, 255, 255)
     local BSize = Configs.Size or {30, 30}
     local BCorner = Configs.UICorner or true
-    local BStroke = Configs.UIStroke or true
+    local BShape = Configs.CornerRadius or UDim.new(0.5, 0)
+    local BStroke = Configs.UIStroke or false
+    local BStrokeColor = Configs.StrokeColor or ConfigsHub["Color Stroke"]
     local BTransparency = Configs.BackgroundTransparency or 0
     
     local Button = Create(BType .. "Button", ScreenGui, {
@@ -494,21 +512,15 @@ function RedzLib:MakeWindow(Configs)
       Draggable = true
     })
     
-    local Minimized, WaitClick
-    Button.MouseButton1Click:Connect(function()
-      if not WaitClick then
-        WaitClick = true
-        if Minimized then
-          MainFrame.Visible = true
-        else
-          MainFrame.Visible = false
-        end
-        WaitClick = false
-        ControlGuiSize.Active = Minimized
-        ControlGuiSize.Draggable = Minimized
-        Minimized = not Minimized
-      end
-    end)
+    local Minimized
+    local function Minimize()
+      MainFrame.Visible = Minimized
+      ControlGuiSize.Active = Minimized
+      ControlGuiSize.Draggable = Minimized
+      Minimized = not Minimized
+    end
+    
+    Button.MouseButton1Click:Connect(Minimize)
     
     if BType == "Image" then
       Button.Image = BNameImage
@@ -517,8 +529,8 @@ function RedzLib:MakeWindow(Configs)
       Button.Text = BNameImage
       Button.TextColor3 = BColor
     end
-    if BCorner then ElementsHub:Corner(Button)end
-    if BStroke then ElementsHub:Stroke(Button)end
+    if BCorner then ElementsHub:Corner(Button, {CornerRadius = BShape})end
+    if BStroke then ElementsHub:Stroke(Button, {Color = BStrokeColor})end
   end
   local IsFirst = true
   function Window:Set(val1)
@@ -656,7 +668,7 @@ function RedzLib:MakeWindow(Configs)
         BackgroundTransparency = 1,
         TextXAlignment = "Left",
         Font = ConfigsHub["Font"]
-      })TextSetColor(TextLabel)
+      })
       
       local Section = {}
       
@@ -948,16 +960,12 @@ function RedzLib:MakeWindow(Configs)
         end
       end
       
-      TextLabel1.MouseEnter:Connect(function()
-        if not ToggleVal then
-          CreateTween(TextLabel1, "TextColor3", ConfigsHub["Color Theme"], 0.4, false)
-        end
-      end)
-      TextLabel1.MouseLeave:Connect(function()
-        if not ToggleVal then
-          CreateTween(TextLabel1, "TextColor3", ConfigsHub["Color Text"], 0.4, false)
-        end
-      end)
+      TextLabel1.MouseEnter:Connect(function()if not ToggleVal then
+        CreateTween(TextLabel1, "TextColor3", ConfigsHub["Color Theme"], 0.4, false)
+      end;end)
+      TextLabel1.MouseLeave:Connect(function()if not ToggleVal then
+        CreateTween(TextLabel1, "TextColor3", ConfigsHub["Color Text"], 0.4, false)
+      end;end)
       
       ButtonF.MouseButton1Click:Connect(function()
         ToggleVal = not ToggleVal
